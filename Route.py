@@ -1,9 +1,9 @@
-import Truck
 import DeliveryInfo
 import datetime
 import random
 
 
+# helper method that changes a list into a dict
 def change_to_dict(list_to_change):
     new_dict = dict()
     for elem_index, elem in enumerate(list_to_change):
@@ -12,11 +12,13 @@ def change_to_dict(list_to_change):
     return new_dict
 
 
+# calculate the distance from one location to another using the full location distance data
 def get_dist_from_to(loc_dis_dict, from_here, to_there):
     dist = loc_dis_dict.get(from_here).get(to_there)
     return dist
 
 
+# takes 1 location and gets the next closest location by distance using the full location distance data
 def get_next_closest_loc(loc_dis_dict1, truck_load1, start_id1, visited1, switch_list):
     if switch_list[0]:
         list_to_switch_to = switch_list[1]
@@ -37,6 +39,7 @@ def get_next_closest_loc(loc_dis_dict1, truck_load1, start_id1, visited1, switch
                             return result
 
 
+# runs a look ahead function with some randomness added. returns a dict of locations and distances tested
 def get_start_id_test_avg(keys, packages, loc_dis_list):
     test_list = {}
     for k in keys:
@@ -61,63 +64,13 @@ def get_start_id_test_avg(keys, packages, loc_dis_list):
     return test_list
 
 
-def run_route(start_id, start_loc, truck_load, loc_dis_list, curr_time, go_back):
-    deliveries = {}
-    truck = Truck.Truck().storage
-    next_closest_loc = ''
-    visited = []
-    from_index = 0
-    to_index = 1
-
-    for k, v in truck_load.items():
-        deliveries[v.get_id()] = DeliveryInfo.DeliveryInfo(v.get_id(), 'enroute', None, False)
-
-    print(start_id)
-    miles = get_dist_from_to(loc_dis_list, start_loc, truck_load.get(start_id).get_distances())
-    curr_time = curr_time + datetime.timedelta(minutes=(miles / 18) * 60)
-    deliveries[start_id] = DeliveryInfo.DeliveryInfo(start_id, 'delivered', curr_time, True)
-    visited.append(start_id)
-    # print('hi', loc_dis_list.get(truck_load.get(40).get_distances()))
-    for delivery in deliveries:
-        # print('start location:', next_closest_loc, 'start id:', start_id)
-        print('start time:', curr_time, 'miles:', miles)
-
-        data = get_next_closest_loc(loc_dis_list, truck_load, start_id, visited)
-        if data is None:
-            break
-        next_closest_loc = data[0]
-        start_id = data[1]
-
-        visited.append(start_id)
-
-        miles_dif = get_dist_from_to(loc_dis_list, truck_load.get(visited[from_index]).get_distances(),
-                                     truck_load.get(visited[to_index]).get_distances())
-        miles = miles + miles_dif
-
-        # print('finish:', next_closest_loc, 'finish id:', start_id)
-        curr_time = curr_time + datetime.timedelta(minutes=(miles_dif / 18) * 60)
-        if go_back is True and curr_time.hour == 9:
-            deliveries[start_id] = DeliveryInfo.DeliveryInfo(start_id, 'delivered', curr_time, True)
-            result = [curr_time, miles, deliveries, visited[-1], visited]
-            return result
-        print('end time:', curr_time, 'miles dif:', miles_dif)
-
-        deliveries[start_id] = DeliveryInfo.DeliveryInfo(start_id, 'delivered', curr_time, True)
-
-        # print(miles, '+', get_dist_from_to(loc_dis_list, truck_load.get(visited[from_index]).get_distances(), truck_load.get(visited[to_index]).get_distances()))
-
-        from_index += 1
-        to_index += 1
-    # print(visited)
-    result = [curr_time, miles, deliveries, visited[-1], len(visited)]
-    return result
-
-
-def new_run_route(route, packages, curr_time, loc_dis_list, truck1, truck2):
+# runs the route of the given trucks package data returns delivery information
+def new_run_route(route, packages, curr_time, loc_dis_list, truck1, truck2, deliveries):
     global enroute, delivered
-    deliveries = {}
+    deliveries = deliveries
     visited = []
     miles = 0
+    loaded_on_time = curr_time
 
     if truck1[0] is True:
         enroute = truck1[1] + ': enroute'
@@ -126,21 +79,29 @@ def new_run_route(route, packages, curr_time, loc_dis_list, truck1, truck2):
         enroute = truck2[1] + ': enroute'
         delivered = truck2[1] + ': delivered'
 
-    for value in route:
-        deliveries[value] = DeliveryInfo.DeliveryInfo(value, enroute, None, False)
+    for pac in packages:
+        pac.getValue().set_delivery_status('delivered')
 
-    for index in range(len(route) - 1):
-        miles_dif = get_dist_from_to(loc_dis_list, packages.find(route[index]).getValue().get_distances(),
-                                     packages.find(route[index + 1]).getValue().get_distances())
-        miles = miles + miles_dif
-        curr_time = curr_time + datetime.timedelta(minutes=(miles_dif / 18) * 60)
-        deliveries[route[index]] = DeliveryInfo.DeliveryInfo(route[index], delivered, curr_time, True)
+    for value in route:
+        deliveries[value] = DeliveryInfo.DeliveryInfo(value, enroute, None, loaded_on_time, False)
+
+    for index, value in enumerate(route):
+        if not index + 1 > len(route) - 1:
+            miles_dif = get_dist_from_to(loc_dis_list, packages.find(route[index]).getValue().get_distances(),
+                                         packages.find(route[index + 1]).getValue().get_distances())
+            miles = miles + miles_dif
+            curr_time = curr_time + datetime.timedelta(minutes=(miles_dif / 18) * 60)
+            deliveries[route[index]] = DeliveryInfo.DeliveryInfo(route[index], delivered, curr_time, loaded_on_time,
+                                                                 True)
+            visited.append(route[index])
+        deliveries[route[index]] = DeliveryInfo.DeliveryInfo(route[index], delivered, curr_time, loaded_on_time, True)
         visited.append(route[index])
 
     visited.append(route[len(route) - 1])
     return [miles, curr_time, visited, deliveries]
 
 
+# creates the morning route with package that needs to be delivered first. takes in up to 5 different list to build route from
 def get_packages_for_morning_route_with_earliest(hub, earliest, morning, any_time, loc_dist_list, truck1_only,
                                                  truck2_third_list):
     main_packages = morning
@@ -152,6 +113,7 @@ def get_packages_for_morning_route_with_earliest(hub, earliest, morning, any_tim
     truck2 = truck2_third_list[0]
     truck2_third_list = truck2_third_list[1]
 
+    # if there are packages that need to be delivered early put them at the front of the line
     if len(earliest) > 0:
         for index, value in enumerate(earliest):
             if len(truck) <= 16:
@@ -170,6 +132,8 @@ def get_packages_for_morning_route_with_earliest(hub, earliest, morning, any_tim
                     if current[curr_index + 1] is not None:
                         truck.append(current[curr_index + 1][1])
                         curr_index += 1
+
+    # if no early packages need delivering create route from other data only
     else:
         driver = get_start_id_test_avg(list(main_packages.keys()), main_packages, loc_dist_list)
         first_key = min(driver, key=driver.get)
@@ -189,6 +153,7 @@ def get_packages_for_morning_route_with_earliest(hub, earliest, morning, any_tim
                         truck.append(current[curr_index + 1][1])
                         curr_index += 1
 
+    # if the truck is full dont add anymore packages
     if len(truck) == 16:
         return truck
     curr_index = len(current) - 1
@@ -234,10 +199,10 @@ def get_packages_for_morning_route_with_earliest(hub, earliest, morning, any_tim
                         truck.append(current[curr_index + 1][1])
                         curr_index += 1
 
-    # print(current)
     return truck
 
 
+# build the afternoon route can take 3 list including time sensitive packages
 def get_all_packages_build_afternoon_route(hub, earliest, afternoon, any_time, loc_dist_list):
     afternoon_packages = afternoon
     any_time_packages = any_time
@@ -282,5 +247,4 @@ def get_all_packages_build_afternoon_route(hub, earliest, afternoon, any_time, l
                     truck.append(current[curr_index + 1][1])
                     curr_index += 1
 
-    # print(current)
     return truck

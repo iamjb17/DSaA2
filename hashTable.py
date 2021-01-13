@@ -28,6 +28,7 @@ class Node:
     def getNext(self):
         return self.next
 
+    # returns a string representation of the object
     def __repr__(self):
         key: str = self.getKey()
         value: int = self.getValue()
@@ -37,6 +38,7 @@ class Node:
         return elem.__str__()
 
 
+# walks through the hashtable from node to node
 class HashTableIterator:
     def __init__(self, hashtable):
         self._hashtable = hashtable
@@ -57,14 +59,17 @@ class HashTable:
         self.size = 0
         self.buckets = [None] * init_capacity
 
+    # hash function takes a key and turns it into a form that can be modulated against. mod by the size of the hash table to have a range of values to fit the size
     def hash_function(self, key):
         sum_from_hash = 0
+        # this hash failed hash function didnt spread the values through the buckets enough for me
         # for each letter in the key, sum_from_hash = sum_from_hash + (index of the letter + length of key to the power
         # the unicode point of that letter -> sum_from_hash = sum_from_hash mod capacity of the hash table.
-        sum_from_hash = hash(key) % self.init_capacity
         # for index, curr in enumerate(key):
         #     sum_from_hash += (index + len(key) ** ord(curr))
         #     sum_from_hash = sum_from_hash % self.init_capacity
+        sum_from_hash = hash(key) % self.init_capacity
+
         return sum_from_hash
 
     # adds a new key:value to the table. if collision happens appends to the elements next
@@ -78,13 +83,11 @@ class HashTable:
         prev = node
         # Traverse the nodes, keeping track of the previous node
         while node is not None:
-            # print("node not none")
-            # print(node)
             prev = node
             node = node.next
         prev.next = Node(key, value)
 
-    #
+    # finds the (entire node) by recalculating the input keys hash value(index) and looking inside that bucket. If nothing found return None
     def find(self, key):
         index = self.hash_function(key)
         node = self.buckets[index]
@@ -95,7 +98,7 @@ class HashTable:
         else:
             return node
 
-    #
+    # delete and returns a node and redirects pointers from the previous node to the next node after the deleted node
     def remove(self, key):
         index = self.hash_function(key)
         node = self.buckets[index]
@@ -114,5 +117,6 @@ class HashTable:
                 prev.next = prev.next.next
             return result
 
+    # allows for iteration through the hashtable. Needed for loops and other builtins of python
     def __iter__(self):
         return HashTableIterator(self)
