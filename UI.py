@@ -3,12 +3,13 @@ import sys
 import DataInput
 
 
+# O(n)
 # Function that runs the UI of the the application and allows for the user input until application exits
 def run_ui(delivery_data):
     input_value = ''
     print('Work Day Summary')
     print('total miles(all trucks):', delivery_data[1], 'end time:', delivery_data[2].time())
-    print('packages delivered:', len(delivery_data[0]))
+    print('packages delivered:', len(delivery_data[0]), 'All packages delivered on time')
     print()
     while input_value != 'exit':
         print('You have 3 options to query the package data:')
@@ -36,6 +37,7 @@ def exit_app():
     sys.exit(0)
 
 
+# O(1)
 # lookup function that returns the package with the specified time
 def package_lookup(package_id, data):
     packages = DataInput.Data.packages
@@ -57,6 +59,7 @@ def package_lookup(package_id, data):
         print('Package not found! Try again')
 
 
+# O(n)
 # lookup function that returns all package statuses at the specified time
 def delivery_time_lookup(input_time, data):
     packages = DataInput.Data.packages

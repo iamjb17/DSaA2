@@ -37,6 +37,7 @@ class Package:
     def get_address(self):
         return self.address
 
+    # O(1)
     # return package deadline
     def get_deadline(self):
         if self.deadline == 'EOD':

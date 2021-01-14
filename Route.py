@@ -3,6 +3,9 @@ import datetime
 import random
 
 
+# O(n^3)
+
+# O(n^2)
 # helper method that changes a list into a dict
 def change_to_dict(list_to_change):
     new_dict = dict()
@@ -12,12 +15,14 @@ def change_to_dict(list_to_change):
     return new_dict
 
 
+# o(1)
 # calculate the distance from one location to another using the full location distance data
 def get_dist_from_to(loc_dis_dict, from_here, to_there):
     dist = loc_dis_dict.get(from_here).get(to_there)
     return dist
 
 
+# O(n^2)
 # takes 1 location and gets the next closest location by distance using the full location distance data
 def get_next_closest_loc(loc_dis_dict1, truck_load1, start_id1, visited1, switch_list):
     if switch_list[0]:
@@ -39,6 +44,7 @@ def get_next_closest_loc(loc_dis_dict1, truck_load1, start_id1, visited1, switch
                             return result
 
 
+# O(n^3)
 # runs a look ahead function with some randomness added. returns a dict of locations and distances tested
 def get_start_id_test_avg(keys, packages, loc_dis_list):
     test_list = {}
@@ -64,6 +70,7 @@ def get_start_id_test_avg(keys, packages, loc_dis_list):
     return test_list
 
 
+# O(3n)
 # runs the route of the given trucks package data returns delivery information
 def new_run_route(route, packages, curr_time, loc_dis_list, truck1, truck2, deliveries):
     global enroute, delivered
@@ -101,6 +108,7 @@ def new_run_route(route, packages, curr_time, loc_dis_list, truck1, truck2, deli
     return [miles, curr_time, visited, deliveries]
 
 
+# O(n^2)
 # creates the morning route with package that needs to be delivered first. takes in up to 5 different list to build route from
 def get_packages_for_morning_route_with_earliest(hub, earliest, morning, any_time, loc_dist_list, truck1_only,
                                                  truck2_third_list):
@@ -202,6 +210,7 @@ def get_packages_for_morning_route_with_earliest(hub, earliest, morning, any_tim
     return truck
 
 
+# O(n^2)
 # build the afternoon route can take 3 list including time sensitive packages
 def get_all_packages_build_afternoon_route(hub, earliest, afternoon, any_time, loc_dist_list):
     afternoon_packages = afternoon

@@ -6,9 +6,11 @@ import UI
 
 # only run this code if I am running as the main entry point of the application
 if __name__ == '__main__':
-    # * Driver Main Class BigO = *
+    # * Driver Main Class-- The dominate time complexity is O(n^3), worst case *
     class Main:
         # The primary use of dict data structure was used because 0(1) search feature and ability to self adjust its size to fit the data
         # Main Algorithm used is the Greedy Algorithm, self adjusting
+        # O(n^2) + O(n^3)
         delivery_data = RunRoute.run_route()
+        # O(n)
         UI.run_ui(delivery_data)

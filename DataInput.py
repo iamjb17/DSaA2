@@ -2,6 +2,9 @@ import hashTable
 import Package
 
 
+# O(n^2)
+
+# O(n^2)
 # because the distance and location data is uniform(distance is correct both ways), fill the missing dat by the inverse of the data based on location
 def fill_distance_list(d_list):
     for row_index, row in enumerate(d_list):
@@ -13,13 +16,15 @@ def fill_distance_list(d_list):
     return d_list
 
 
-# this sorts the distances for/from each location from shorted to furthest away location
+# O(n log n)
+# this sorts the distances for/from each location from shortest to furthest away location
 def sort_distances(d_list):
     for index, dict_elem in enumerate(d_list):
         d_list[index] = dict(sorted(dict_elem.items(), key=lambda curr: curr[1]))
     return d_list
 
 
+# O(n)
 # change 2 list to 1 dict and structuring the data in such a way that data from the data from one list is the value and data from the other list is the key
 def change_from_list_to_dict(d_list, locations):
     for row_index, row in enumerate(d_list):
@@ -44,6 +49,7 @@ class Data:
     iterator2 = iter(packages)
     list_of_distances = [[]]
 
+    # O(n)
     # opens a file and loads the data into a data structure
     with open('Resources/location_list.txt', 'r') as location_list:
         location_data = location_list.readlines()
@@ -51,6 +57,7 @@ class Data:
         locations.append(line.replace(',\n', ''))
     loc_index += 1
 
+    # O(n)
     # opens a file and loads the data into a data structure
     with open('Resources/deliver_distances.txt', 'r') as distance_list:
         distance_data = distance_list.readlines()
@@ -62,6 +69,7 @@ class Data:
         distances[locations[add_dis_loc_index]] = line.replace('\n', '')
         add_dis_loc_index += 1
 
+    # O(n^2)
     # opens a file and loads the data into a data structure
     with open('Resources/package_information.txt', 'r') as package_list:
         header = package_list.readline()
@@ -87,6 +95,7 @@ class Data:
     list_of_distances = sort_distances(list_of_distances)
     list_of_distances.pop(len(list_of_distances) - 1)
 
+    # O(n)
     # merging list of locations into an already existing dict
     for k, v in distances.items():
         distances[k] = list_of_distances[add_dis]

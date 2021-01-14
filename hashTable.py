@@ -72,6 +72,7 @@ class HashTable:
 
         return sum_from_hash
 
+    # O(1)
     # adds a new key:value to the table. if collision happens appends to the elements next
     def insert(self, key, value):
         self.size += 1
@@ -87,6 +88,7 @@ class HashTable:
             node = node.next
         prev.next = Node(key, value)
 
+    # O(1)
     # finds the (entire node) by recalculating the input keys hash value(index) and looking inside that bucket. If nothing found return None
     def find(self, key):
         index = self.hash_function(key)
@@ -98,6 +100,7 @@ class HashTable:
         else:
             return node
 
+    # O(1)
     # delete and returns a node and redirects pointers from the previous node to the next node after the deleted node
     def remove(self, key):
         index = self.hash_function(key)
